@@ -1,1 +1,96 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+        }
+        .messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        .user-message {
+            background-color: #d1f7c4;
+        }
+        .bot-message {
+            background-color: #f0f0f0;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-box">
+        <h2>Chatbot</h2>
+        <div class="messages" id="messages"></div>
+        <input type="text" id="user-input" placeholder="Type your message...">
+    </div>
 
+    <script>
+        const userInput = document.getElementById("user-input");
+        const messagesContainer = document.getElementById("messages");
+
+        // Function to send message to the backend
+        function sendMessage(message) {
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botMessage = data.response;
+                displayMessage(botMessage, "bot-message");
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Function to display messages in the chat box
+        function displayMessage(message, sender) {
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message", sender);
+            messageElement.textContent = message;
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Event listener for user input
+        userInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter" && userInput.value.trim() !== "") {
+                const userMessage = userInput.value;
+                displayMessage(userMessage, "user-message");
+                sendMessage(userMessage);
+                userInput.value = "";
+            }
+        });
+    </script>
+</body>
+</html>
